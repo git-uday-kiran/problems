@@ -10,6 +10,7 @@ public class Game {
     private final Dice dice;
     private final Board board;
     private final List<Player> players;
+    private final Position gameOverPosition;
 
     private int activePlayerIndex;
 
@@ -21,6 +22,7 @@ public class Game {
         this.board = board;
         this.players = preparePlayers(noOfPlayers);
         this.activePlayerIndex = -1;
+        this.gameOverPosition = Position.at(100);
     }
 
     private static List<Player> preparePlayers(int noOfPlayers) {
@@ -41,7 +43,17 @@ public class Game {
             board.turn(activePlayer, dice);
             System.out.println("Player moved to: " + activePlayer.getPosition());
             throat();
+
+            if (isGameOver(activePlayer)) {
+                System.out.println("Game over\n");
+                System.out.println("Player Won: " + activePlayer);
+                break;
+            }
         }
+    }
+
+    private boolean isGameOver(Player player) {
+        return player.getPosition().compareTo(gameOverPosition) >= 0;
     }
 
     private void throat() {
@@ -54,6 +66,10 @@ public class Game {
 
     private Player nextPlayer() {
         setNextActivePlayer();
+        return getActivePlayer();
+    }
+
+    private Player getActivePlayer() {
         return players.get(activePlayerIndex);
     }
 

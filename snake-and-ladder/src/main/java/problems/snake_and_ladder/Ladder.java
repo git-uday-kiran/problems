@@ -7,4 +7,8 @@ public record Ladder(Position top, Position bottom) {
         Objects.requireNonNull(top, "top");
         Objects.requireNonNull(bottom, "bottom");
     }
+
+    public static Ladder at(Position top, Position bottom) {
+        return new Ladder(top, bottom);
+    }
 }

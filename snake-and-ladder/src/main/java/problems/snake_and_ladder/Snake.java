@@ -7,4 +7,8 @@ public record Snake(Position head, Position tail) {
         Objects.requireNonNull(head, "head");
         Objects.requireNonNull(tail, "tail");
     }
+
+    public static Snake at(Position head, Position tail) {
+        return new Snake(head, tail);
+    }
 }

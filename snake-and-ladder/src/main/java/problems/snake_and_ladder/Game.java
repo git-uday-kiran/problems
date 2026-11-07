@@ -14,7 +14,7 @@ public class Game {
 
     private int activePlayerIndex;
 
-    public Game(Board board, Dice dice, int noOfPlayers) {
+    public Game(Board board, Dice dice, Position gameOverPosition, int noOfPlayers) {
         Objects.requireNonNull(board, "board must not be null");
         Objects.requireNonNull(dice, "dice must not be null");
 
@@ -22,7 +22,7 @@ public class Game {
         this.board = board;
         this.players = preparePlayers(noOfPlayers);
         this.activePlayerIndex = -1;
-        this.gameOverPosition = Position.at(100);
+        this.gameOverPosition = gameOverPosition;
     }
 
     private static List<Player> preparePlayers(int noOfPlayers) {
@@ -35,21 +35,32 @@ public class Game {
     }
 
     public void start() {
-        System.out.println("No of players: " + players.size());
-        System.out.println("Starting game...");
+        logGameStarting();
+
         while (true) {
             Player activePlayer = nextPlayer();
-            System.out.println("Current Player: " + activePlayer.getIdentification() + "\t is at: " + activePlayer.getPosition());
+            System.out.println("Current Player " + activePlayer.getIdentification() + " is at position " + activePlayer.getPosition());
             board.turn(activePlayer, dice);
-            System.out.println("Player moved to: " + activePlayer.getPosition());
+            System.out.println("Player moved to: " + activePlayer.getPosition() + "\n");
             throat();
 
             if (isGameOver(activePlayer)) {
-                System.out.println("Game over\n");
-                System.out.println("Player Won: " + activePlayer);
+                logGameOver(activePlayer);
                 break;
             }
         }
+    }
+
+    private static void logGameOver(Player winningPlayer) {
+        System.out.println("\n☠️ 𝙂𝘼𝙈𝙀 𝙊𝙑𝙀𝙍 ☠️");
+        System.out.println("🏆 Player Won: " + winningPlayer + "\n");
+    }
+
+    private void logGameStarting() {
+        System.out.println();
+        System.out.println("Starting game...");
+        System.out.println("No of players: " + players.size());
+        System.out.println();
     }
 
     private boolean isGameOver(Player player) {

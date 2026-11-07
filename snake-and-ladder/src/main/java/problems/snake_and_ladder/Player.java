@@ -34,7 +34,7 @@ public final class Player {
     @Override
     public String toString() {
         return "Player{" +
-                "id" + identification +
+                "id=" + identification +
                 ", position=" + position +
                 '}';
     }

@@ -2,7 +2,7 @@ package problems.snake_and_ladder;
 
 public record Position(int position) implements Comparable<Position> {
 
-    public static final Position INITIAL = new Position(0);
+    public static final Position INITIAL = new Position(1);
 
     public Position increase(int count) {
         return at(position + count);
@@ -15,5 +15,10 @@ public record Position(int position) implements Comparable<Position> {
     @Override
     public int compareTo(Position o) {
         return Integer.compare(position, o.position);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(position);
     }
 }

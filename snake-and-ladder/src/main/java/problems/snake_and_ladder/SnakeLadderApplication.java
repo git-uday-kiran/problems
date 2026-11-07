@@ -20,11 +20,14 @@ public final class SnakeLadderApplication {
                 Snake.at(Position.at(20), Position.at(5)),
                 Snake.at(Position.at(30), Position.at(10)),
                 Snake.at(Position.at(95), Position.at(10)),
-                Snake.at(Position.at(96), Position.at(10))
+                Snake.at(Position.at(96), Position.at(10)),
+                Snake.at(Position.at(80), Position.at(22))
         );
         Set<Ladder> ladders = Set.of(
                 Ladder.at(Position.at(100), Position.at(11)),
-                Ladder.at(Position.at(90), Position.at(12))
+                Ladder.at(Position.at(90), Position.at(12)),
+                Ladder.at(Position.at(80), Position.at(13)),
+                Ladder.at(Position.at(70), Position.at(22))
         );
         return new Board(snakes, ladders);
     }

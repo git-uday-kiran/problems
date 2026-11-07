@@ -8,6 +8,10 @@ public record Snake(Position head, Position tail) {
         Objects.requireNonNull(tail, "tail");
     }
 
+    public void logFoundSnake() {
+        System.out.println("🐍 SNAKE FOUND! Sliding down... 🐍");
+    }
+
     public static Snake at(Position head, Position tail) {
         return new Snake(head, tail);
     }

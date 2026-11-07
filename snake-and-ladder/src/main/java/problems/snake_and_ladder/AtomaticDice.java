@@ -7,6 +7,6 @@ public final class AtomaticDice implements Dice {
     private static final Random RANDOM = new Random();
 
     public int roll() {
-        return RANDOM.nextInt(1, MAX_POSSIBILITIES);
+        return RANDOM.nextInt(1, MAX_POSSIBILITIES + 1);
     }
 }

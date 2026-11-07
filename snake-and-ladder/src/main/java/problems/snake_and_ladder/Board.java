@@ -44,7 +44,7 @@ public final class Board {
     private static void assertSnakeHeadsAndLadderTopsAreNotSame(Set<Snake> snakes, Set<Ladder> ladders) {
         for (Snake snake : snakes) {
             Position head = snake.head();
-            boolean ladderHasThisSnakeHead = ladders.stream().map(Ladder::top).anyMatch(head::equals);
+            boolean ladderHasThisSnakeHead = ladders.stream().map(Ladder::bottom).anyMatch(head::equals);
             if (ladderHasThisSnakeHead) {
                 throw new IllegalStateException("Snake " + snake + " has same head as one of the ladder " + ladders);
             }
@@ -53,12 +53,22 @@ public final class Board {
 
     public void turn(Player player, Dice dice) {
         Position position = player.takeTurn(dice);
-        findAnySnake(position)
-                .map(Snake::tail)
-                .ifPresent(player::move);
-        findAnyLadder(position)
-                .map(Ladder::top)
-                .ifPresent(player::move);
+        while (anySnakeOrLadderPresent(position)) {
+            Optional<Snake> snake = findAnySnake(position);
+            Optional<Ladder> ladder = findAnyLadder(position);
+
+            snake.ifPresent(Snake::logFoundSnake);
+            ladder.ifPresent(Ladder::logLadderFound);
+
+            snake.map(Snake::tail).ifPresent(player::move);
+            ladder.map(Ladder::top).ifPresent(player::move);
+
+            position = player.getPosition();
+        }
+    }
+
+    private boolean anySnakeOrLadderPresent(Position position) {
+        return findAnySnake(position).isPresent() || findAnyLadder(position).isPresent();
     }
 
     private Optional<Ladder> findAnyLadder(Position position) {

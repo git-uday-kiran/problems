@@ -8,6 +8,10 @@ public record Ladder(Position top, Position bottom) {
         Objects.requireNonNull(bottom, "bottom");
     }
 
+    public void logLadderFound() {
+        System.out.println("🪜 LADDER FOUND! Climbing up... 🪜");
+    }
+
     public static Ladder at(Position top, Position bottom) {
         return new Ladder(top, bottom);
     }

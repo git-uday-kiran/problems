@@ -1,10 +1,11 @@
 package problems.parking_lot;
 
+import java.time.Clock;
 import java.util.concurrent.TimeUnit;
 
 public final class ParkingLotApplication {
     public static void main(String[] args) {
-        ParkingManager manager = new ParkingManager();
+        ParkingManager manager = new ParkingManager(Clock.systemDefaultZone());
 
         int carSlotNumber = manager.registerNewSlot(1, VehicleType.CAR);
         int autoSlotNumber = manager.registerNewSlot(1, VehicleType.AUTO);

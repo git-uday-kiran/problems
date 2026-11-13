@@ -28,22 +28,20 @@ public final class Slot {
         this.usedReceipts = new HashSet<>();
     }
 
-    public synchronized void park(Vehicle vehicle) {
+    public synchronized void park(Vehicle vehicle, long nowMillis) {
         assertVehicleTypeSupported(vehicle.getType());
         assertSlotIsNotOccupied();
-        long startTimeMillis = System.currentTimeMillis();
-        occupiedVehicle = new OccupiedVehicle(startTimeMillis, vehicle);
+        occupiedVehicle = new OccupiedVehicle(nowMillis, vehicle);
     }
 
-    public synchronized long unpark(Receipt receipt) {
+    public synchronized long unpark(Receipt receipt, long nowMillis) {
         assertSlotIsOccupied();
         assertReceiptNotUsedAlready(receipt);
         assertValidReceptToUnpark(receipt);
-        long endTimeMillis = System.currentTimeMillis();
         long startTimeMillis = occupiedVehicle.startTimeMillis();
         occupiedVehicle = null;
         usedReceipts.add(generateReceiptHash(receipt));
-        return (endTimeMillis - startTimeMillis);
+        return (nowMillis - startTimeMillis);
     }
 
     public void assertReceiptNotUsedAlready(Receipt receipt) {
@@ -98,22 +96,16 @@ public final class Slot {
     }
 
     public boolean isValidReceptToUnpark(Receipt receipt) {
-        if (isOccupied() || isAlreadyUsedReceipt(receipt)) {
-            return false;
-        }
-
-        String receiptHash = generateReceiptHash(receipt);
-        String slotHash = generateOccupiedSlotHash();
-        return Objects.equals(slotHash, receiptHash);
+        return isOccupied()
+                && receipt.floor() == floor
+                && receipt.slotNumber() == slotNumber
+                && supportedVehicleType == receipt.vehicleType()
+                && occupiedVehicle.startTimeMillis() == receipt.startingTimeMillis();
     }
 
     public boolean isAlreadyUsedReceipt(Receipt receipt) {
         String receiptHash = generateReceiptHash(receipt);
         return usedReceipts.contains(receiptHash);
-    }
-
-    private String generateOccupiedSlotHash() {
-        return hashCode(floor, slotNumber, supportedVehicleType, occupiedVehicle.startTimeMillis());
     }
 
     private static String generateReceiptHash(Receipt receipt) {

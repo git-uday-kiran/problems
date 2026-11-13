@@ -3,11 +3,11 @@ package problems.parking_lot;
 import problems.parking_lot.exception.InvalidReceiptSlotNotFoundException;
 import problems.parking_lot.exception.SlotNotAvailable;
 
+import java.time.Clock;
+import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
@@ -16,12 +16,14 @@ import static java.util.function.Predicate.not;
 
 public final class ParkingManager {
 
-    private final Map<VehicleType, Set<Slot>> slotsByType;
-    private final Map<VehicleType, ReentrantLock> locks;
+    private final Clock clock;
+    private final EnumMap<VehicleType, Set<Slot>> slotsByType;
+    private final EnumMap<VehicleType, ReentrantLock> locks;
 
-    public ParkingManager() {
-        this.slotsByType = new ConcurrentHashMap<>();
-        this.locks = new ConcurrentHashMap<>();
+    public ParkingManager(Clock clock) {
+        this.slotsByType = new EnumMap<>(VehicleType.class);
+        this.locks = new EnumMap<>(VehicleType.class);
+        this.clock = requireNonNull(clock);
 
         for (VehicleType vehicleType : VehicleType.values()) {
             slotsByType.put(vehicleType, new HashSet<>());
@@ -36,7 +38,7 @@ public final class ParkingManager {
 
         try {
             Slot availableSlot = getAvailableSlot(vehicleType).orElseThrow(slotNotAvailable(vehicleType));
-            availableSlot.park(vehicle);
+            availableSlot.park(vehicle, clock.millis());
             return availableSlot.prepareReceipt();
         } finally {
             locker.unlock();
@@ -52,7 +54,7 @@ public final class ParkingManager {
         try {
             assertReceiptNotUsedAlready(receipt, slots);
             Slot occupiedSlot = findSlot(receipt, slots).orElseThrow(invalidReceiptSlotNotFoundForReceiptException());
-            long totalParkedTimeMillis = occupiedSlot.unpark(receipt);
+            long totalParkedTimeMillis = occupiedSlot.unpark(receipt, clock.millis());
             return calculateFee(totalParkedTimeMillis, occupiedSlot.getPricePerHour());
         } finally {
             locker.unlock();

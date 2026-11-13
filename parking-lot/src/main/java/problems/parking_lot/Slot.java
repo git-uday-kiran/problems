@@ -28,22 +28,21 @@ public final class Slot {
         return occupiedVehicle;
     }
 
-    public OccupiedVehicle park(Vehicle vehicle) {
+    public void park(Vehicle vehicle) {
         assertSlotIsAvailable();
         long startTimeMillis = System.currentTimeMillis();
         occupiedVehicle = new OccupiedVehicle(startTimeMillis, vehicle);
-        return occupiedVehicle;
     }
 
     public long unpark() {
-        occupiedVehicle = null;
         long endTimeMillis = System.currentTimeMillis();
         long startTimeMillis = (occupiedVehicle == null) ? endTimeMillis : occupiedVehicle.startTimeMillis();
+        occupiedVehicle = null;
         return (endTimeMillis - startTimeMillis);
     }
 
     public boolean isAvailable() {
-        return (occupiedVehicle != null);
+        return (occupiedVehicle == null);
     }
 
     private void assertSlotIsAvailable() {

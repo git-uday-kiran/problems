@@ -21,7 +21,7 @@ public final class Slot {
         this.supportedVehicleType = supportedVehicleType;
     }
 
-    public OccupiedVehicle getOccupiedVehicle() {
+    public OccupiedVehicle requireOccupiedVehicle() {
         if (occupiedVehicle == null) {
             throw new VehicleNotFoundException("Slot is not occupied by any vehicle");
         }
@@ -29,7 +29,7 @@ public final class Slot {
     }
 
     public void park(Vehicle vehicle) {
-        assertSlotIsAvailable();
+        assertSlotIsNotOccupied();
         long startTimeMillis = System.currentTimeMillis();
         occupiedVehicle = new OccupiedVehicle(startTimeMillis, vehicle);
     }
@@ -41,12 +41,12 @@ public final class Slot {
         return (endTimeMillis - startTimeMillis);
     }
 
-    public boolean isAvailable() {
-        return (occupiedVehicle == null);
+    public boolean isOccupied() {
+        return (occupiedVehicle != null);
     }
 
-    private void assertSlotIsAvailable() {
-        if (!isAvailable()) {
+    private void assertSlotIsNotOccupied() {
+        if (isOccupied()) {
             throw new SlotNotAvailable("Slot is not available");
         }
     }
@@ -56,9 +56,7 @@ public final class Slot {
     }
 
     public Receipt prepareReceipt() {
-        OccupiedVehicle occupiedVehicle = getOccupiedVehicle();
-        Vehicle vehicle = occupiedVehicle.vehicle();
-
+        Vehicle vehicle = requireOccupiedVehicle().vehicle();
         return new Receipt(
                 slotNumber,
                 floor,

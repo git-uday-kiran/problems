@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.function.Predicate.not;
 
 public final class ParkingManager {
 
@@ -47,7 +48,7 @@ public final class ParkingManager {
         ReentrantLock locker = locks.get(vehicleType);
         try {
             locker.lock();
-            Slot occupiedSlot = findSlot(receipt).orElseThrow(invalidReceiptSlotNotFoundException(receipt));
+            Slot occupiedSlot = findSlot(receipt).orElseThrow(invalidReceiptSlotNotFoundException());
             long totalParkedTimeMillis = occupiedSlot.unpark();
             return calculateFee(totalParkedTimeMillis, occupiedSlot.getPricePerHour());
         } finally {
@@ -56,7 +57,7 @@ public final class ParkingManager {
     }
 
 
-    private static Supplier<InvalidReceiptSlotNotFoundException> invalidReceiptSlotNotFoundException(Receipt receipt) {
+    private static Supplier<InvalidReceiptSlotNotFoundException> invalidReceiptSlotNotFoundException() {
         return () -> new InvalidReceiptSlotNotFoundException("Invalid receipt: The slot was not found or has not been registered.");
     }
 
@@ -83,7 +84,7 @@ public final class ParkingManager {
 
     private Optional<Slot> getAvailableSlot(VehicleType vehicleType) {
         return slotsByType.get(vehicleType).stream()
-                .filter(Slot::isAvailable)
+                .filter(not(Slot::isOccupied))
                 .findAny();
     }
 

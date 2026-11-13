@@ -28,13 +28,13 @@ public final class Slot {
         this.usedReceipts = new HashSet<>();
     }
 
-    public synchronized void park(Vehicle vehicle, long nowMillis) {
+    public void park(Vehicle vehicle, long nowMillis) {
         assertVehicleTypeSupported(vehicle.getType());
         assertSlotIsNotOccupied();
         occupiedVehicle = new OccupiedVehicle(nowMillis, vehicle);
     }
 
-    public synchronized long unpark(Receipt receipt, long nowMillis) {
+    public long unpark(Receipt receipt, long nowMillis) {
         assertSlotIsOccupied();
         assertReceiptNotUsedAlready(receipt);
         assertValidReceptToUnpark(receipt);

@@ -3,6 +3,7 @@ package problems.parking_lot;
 import lombok.Getter;
 import problems.parking_lot.exception.SlotNotAvailable;
 import problems.parking_lot.exception.VehicleNotFoundException;
+import problems.parking_lot.exception.VehicleTypeNotSupported;
 
 import java.util.Objects;
 
@@ -29,6 +30,7 @@ public final class Slot {
     }
 
     public void park(Vehicle vehicle) {
+        assertVehicleTypeSupported(vehicle.getType());
         assertSlotIsNotOccupied();
         long startTimeMillis = System.currentTimeMillis();
         occupiedVehicle = new OccupiedVehicle(startTimeMillis, vehicle);
@@ -43,6 +45,12 @@ public final class Slot {
 
     public boolean isOccupied() {
         return (occupiedVehicle != null);
+    }
+
+    private void assertVehicleTypeSupported(VehicleType vehicleType) {
+        if (supportedVehicleType != vehicleType) {
+            throw new VehicleTypeNotSupported("Vehicle type is not supported: " + vehicleType);
+        }
     }
 
     private void assertSlotIsNotOccupied() {

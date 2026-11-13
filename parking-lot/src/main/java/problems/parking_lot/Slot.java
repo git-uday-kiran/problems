@@ -1,11 +1,14 @@
 package problems.parking_lot;
 
 import lombok.Getter;
-import problems.parking_lot.exception.SlotNotAvailable;
+import problems.parking_lot.exception.InvalidReceiptException;
+import problems.parking_lot.exception.SlotException;
 import problems.parking_lot.exception.VehicleNotFoundException;
 import problems.parking_lot.exception.VehicleTypeNotSupported;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
@@ -15,6 +18,7 @@ public final class Slot {
     private final int floor;
     private final int slotNumber;
     private final VehicleType supportedVehicleType;
+    private final Set<String> usedReceipts;
 
     private OccupiedVehicle occupiedVehicle;
 
@@ -22,31 +26,54 @@ public final class Slot {
         this.floor = floor;
         this.slotNumber = slotNumber;
         this.supportedVehicleType = requireNonNull(supportedVehicleType);
+        this.usedReceipts = new HashSet<>();
     }
 
-    public OccupiedVehicle requireOccupiedVehicle() {
+    private OccupiedVehicle requireOccupiedVehicle() {
         if (occupiedVehicle == null) {
             throw new VehicleNotFoundException("Slot is not occupied by any vehicle");
         }
         return occupiedVehicle;
     }
 
-    public void park(Vehicle vehicle) {
+    public synchronized void park(Vehicle vehicle) {
         assertVehicleTypeSupported(vehicle.getType());
         assertSlotIsNotOccupied();
         long startTimeMillis = System.currentTimeMillis();
         occupiedVehicle = new OccupiedVehicle(startTimeMillis, vehicle);
     }
 
-    public long unpark() {
+    public synchronized long unpark(Receipt receipt) {
+        assertSlotIsOccupied();
+        assertReceptNotUsedAlready(receipt);
+        assertValidReceptToUnpark(receipt);
         long endTimeMillis = System.currentTimeMillis();
-        long startTimeMillis = (occupiedVehicle == null) ? endTimeMillis : occupiedVehicle.startTimeMillis();
+        long startTimeMillis = occupiedVehicle.startTimeMillis();
         occupiedVehicle = null;
+        usedReceipts.add(generateReceiptHash(receipt));
         return (endTimeMillis - startTimeMillis);
+    }
+
+    public void assertReceptNotUsedAlready(Receipt receipt) {
+        if (isAlreadyUedReceipt(receipt)) {
+            throw new InvalidReceiptException("Receipt is already used");
+        }
+    }
+
+    private void assertValidReceptToUnpark(Receipt receipt) {
+        if (!isValidReceptToUnpark(receipt)) {
+            throw new InvalidReceiptException("Receipt is not valid to unpark");
+        }
     }
 
     public boolean isOccupied() {
         return (occupiedVehicle != null);
+    }
+
+    private void assertSlotIsOccupied() {
+        if (!isOccupied()) {
+            throw new SlotException("Slot is not occupied by any vehicle");
+        }
     }
 
     private void assertVehicleTypeSupported(VehicleType vehicleType) {
@@ -57,7 +84,7 @@ public final class Slot {
 
     private void assertSlotIsNotOccupied() {
         if (isOccupied()) {
-            throw new SlotNotAvailable("Slot is not available");
+            throw new SlotException("Slot is not available");
         }
     }
 
@@ -77,10 +104,23 @@ public final class Slot {
         );
     }
 
-    public boolean isValidRecept(Receipt receipt) {
-        String receiptHash = hashCode(receipt.floor(), receipt.slotNumber(), receipt.vehicleType());
-        String slotHash = hashCode(floor, slotNumber, supportedVehicleType);
+    public boolean isValidReceptToUnpark(Receipt receipt) {
+        String receiptHash = generateReceiptHash(receipt);
+        String slotHash = generateOccupiedSlotHash();
         return Objects.equals(slotHash, receiptHash);
+    }
+
+    public boolean isAlreadyUedReceipt(Receipt receipt) {
+        String receiptHash = generateReceiptHash(receipt);
+        return usedReceipts.contains(receiptHash);
+    }
+
+    private String generateOccupiedSlotHash() {
+        return hashCode(floor, slotNumber, supportedVehicleType, occupiedVehicle.startTimeMillis());
+    }
+
+    private static String generateReceiptHash(Receipt receipt) {
+        return hashCode(receipt.floor(), receipt.slotNumber(), receipt.vehicleType(), receipt.startingTimeMillis());
     }
 
     @Override
@@ -94,8 +134,8 @@ public final class Slot {
                 && supportedVehicleType == slot.supportedVehicleType;
     }
 
-    private static String hashCode(int floor, int slotNumber, VehicleType vehicleType) {
-        return floor + "#" + slotNumber + "#" + vehicleType;
+    private static String hashCode(int floor, int slotNumber, VehicleType vehicleType, long startTimeMillis) {
+        return floor + "#" + slotNumber + "#" + vehicleType + "#" + startTimeMillis;
     }
 
     @Override

@@ -46,19 +46,27 @@ public final class ParkingManager {
     public long unpark(Receipt receipt) {
         VehicleType vehicleType = requireNonNull(receipt.vehicleType());
         ReentrantLock locker = locks.get(vehicleType);
+        Set<Slot> slots = slotsByType.get(vehicleType);
+
         try {
             locker.lock();
-            Slot occupiedSlot = findSlot(receipt).orElseThrow(invalidReceiptSlotNotFoundException());
-            long totalParkedTimeMillis = occupiedSlot.unpark();
+            assertReceiptNotUsedAlready(receipt, slots);
+            Slot occupiedSlot = findSlot(receipt, slots).orElseThrow(invalidReceiptSlotNotFoundForReceiptException());
+            long totalParkedTimeMillis = occupiedSlot.unpark(receipt);
             return calculateFee(totalParkedTimeMillis, occupiedSlot.getPricePerHour());
         } finally {
             locker.unlock();
         }
     }
 
+    private void assertReceiptNotUsedAlready(Receipt receipt, Set<Slot> slots) {
+        for (Slot slot : slots) {
+            slot.assertReceptNotUsedAlready(receipt);
+        }
+    }
 
-    private static Supplier<InvalidReceiptSlotNotFoundException> invalidReceiptSlotNotFoundException() {
-        return () -> new InvalidReceiptSlotNotFoundException("Invalid receipt: The slot was not found or has not been registered.");
+    private static Supplier<InvalidReceiptSlotNotFoundException> invalidReceiptSlotNotFoundForReceiptException() {
+        return () -> new InvalidReceiptSlotNotFoundException("Invalid receipt: The slot was not found or has not been registered for the receipt");
     }
 
     private long calculateFee(long totalParkedTimeMillis, int pricePerHour) {
@@ -67,11 +75,9 @@ public final class ParkingManager {
         return pricePerHour * hours;
     }
 
-    private Optional<Slot> findSlot(Receipt receipt) {
-        VehicleType vehicleType = receipt.vehicleType();
-        Set<Slot> slots = slotsByType.get(vehicleType);
+    private Optional<Slot> findSlot(Receipt receipt, Set<Slot> slots) {
         for (Slot slot : slots) {
-            if (slot.isValidRecept(receipt)) {
+            if (slot.isValidReceptToUnpark(receipt)) {
                 return Optional.of(slot);
             }
         }

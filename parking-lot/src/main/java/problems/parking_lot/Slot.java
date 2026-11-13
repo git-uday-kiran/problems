@@ -3,7 +3,6 @@ package problems.parking_lot;
 import lombok.Getter;
 import problems.parking_lot.exception.InvalidReceiptException;
 import problems.parking_lot.exception.SlotException;
-import problems.parking_lot.exception.VehicleNotFoundException;
 import problems.parking_lot.exception.VehicleTypeNotSupported;
 
 import java.util.HashSet;
@@ -27,13 +26,6 @@ public final class Slot {
         this.slotNumber = slotNumber;
         this.supportedVehicleType = requireNonNull(supportedVehicleType);
         this.usedReceipts = new HashSet<>();
-    }
-
-    private OccupiedVehicle requireOccupiedVehicle() {
-        if (occupiedVehicle == null) {
-            throw new VehicleNotFoundException("Slot is not occupied by any vehicle");
-        }
-        return occupiedVehicle;
     }
 
     public synchronized void park(Vehicle vehicle) {
@@ -93,7 +85,8 @@ public final class Slot {
     }
 
     public Receipt prepareReceipt() {
-        Vehicle vehicle = requireOccupiedVehicle().vehicle();
+        assertSlotIsOccupied();
+        Vehicle vehicle = occupiedVehicle.vehicle();
         return new Receipt(
                 slotNumber,
                 floor,
@@ -105,6 +98,10 @@ public final class Slot {
     }
 
     public boolean isValidReceptToUnpark(Receipt receipt) {
+        if (isOccupied() || isAlreadyUedReceipt(receipt)) {
+            return false;
+        }
+
         String receiptHash = generateReceiptHash(receipt);
         String slotHash = generateOccupiedSlotHash();
         return Objects.equals(slotHash, receiptHash);

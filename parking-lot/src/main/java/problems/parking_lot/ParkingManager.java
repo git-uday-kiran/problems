@@ -32,9 +32,9 @@ public final class ParkingManager {
     public Receipt park(Vehicle vehicle) {
         VehicleType vehicleType = requireNonNull(vehicle.getType());
         ReentrantLock locker = locks.get(vehicleType);
+        locker.lock();
 
         try {
-            locker.lock();
             Slot availableSlot = getAvailableSlot(vehicleType).orElseThrow(slotNotAvailable(vehicleType));
             availableSlot.park(vehicle);
             return availableSlot.prepareReceipt();
@@ -47,9 +47,9 @@ public final class ParkingManager {
         VehicleType vehicleType = requireNonNull(receipt.vehicleType());
         ReentrantLock locker = locks.get(vehicleType);
         Set<Slot> slots = slotsByType.get(vehicleType);
+        locker.lock();
 
         try {
-            locker.lock();
             assertReceiptNotUsedAlready(receipt, slots);
             Slot occupiedSlot = findSlot(receipt, slots).orElseThrow(invalidReceiptSlotNotFoundForReceiptException());
             long totalParkedTimeMillis = occupiedSlot.unpark(receipt);
@@ -70,9 +70,8 @@ public final class ParkingManager {
     }
 
     private long calculateFee(long totalParkedTimeMillis, int pricePerHour) {
-        long seconds = totalParkedTimeMillis / 1000;
-        long hours = (long) Math.ceil(seconds / 3600.00);
-        return pricePerHour * hours;
+        long hours = Math.max(1, Math.ceilDiv(totalParkedTimeMillis, 3_600_000));
+        return hours * pricePerHour;
     }
 
     private Optional<Slot> findSlot(Receipt receipt, Set<Slot> slots) {
@@ -95,11 +94,17 @@ public final class ParkingManager {
     }
 
     public int registerNewSlot(int floor, VehicleType vehicleType) {
-        Set<Slot> slots = slotsByType.get(vehicleType);
-        int newSlotNumber = slots.size();
+        ReentrantLock locker = locks.get(vehicleType);
+        locker.lock();
+        try {
+            Set<Slot> slots = slotsByType.get(vehicleType);
+            int newSlotNumber = slots.size();
 
-        Slot newSlot = new Slot(floor, newSlotNumber, vehicleType);
-        slots.add(newSlot);
-        return newSlotNumber;
+            Slot newSlot = new Slot(floor, newSlotNumber, vehicleType);
+            slots.add(newSlot);
+            return newSlotNumber;
+        } finally {
+            locker.unlock();
+        }
     }
 }

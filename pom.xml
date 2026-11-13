@@ -10,7 +10,15 @@
     <packaging>pom</packaging>
     <modules>
         <module>snake-and-ladder</module>
+        <module>parking-lot</module>
     </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.42</version>
+        </dependency>
+    </dependencies>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

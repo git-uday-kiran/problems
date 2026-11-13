@@ -7,6 +7,8 @@ import problems.parking_lot.exception.VehicleTypeNotSupported;
 
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
+
 @Getter
 public final class Slot {
 
@@ -19,7 +21,7 @@ public final class Slot {
     public Slot(int floor, int slotNumber, VehicleType supportedVehicleType) {
         this.floor = floor;
         this.slotNumber = slotNumber;
-        this.supportedVehicleType = supportedVehicleType;
+        this.supportedVehicleType = requireNonNull(supportedVehicleType);
     }
 
     public OccupiedVehicle requireOccupiedVehicle() {

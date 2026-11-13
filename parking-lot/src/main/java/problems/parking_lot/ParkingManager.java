@@ -61,7 +61,7 @@ public final class ParkingManager {
 
     private void assertReceiptNotUsedAlready(Receipt receipt, Set<Slot> slots) {
         for (Slot slot : slots) {
-            slot.assertReceptNotUsedAlready(receipt);
+            slot.assertReceiptNotUsedAlready(receipt);
         }
     }
 

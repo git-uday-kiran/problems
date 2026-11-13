@@ -37,7 +37,7 @@ public final class Slot {
 
     public synchronized long unpark(Receipt receipt) {
         assertSlotIsOccupied();
-        assertReceptNotUsedAlready(receipt);
+        assertReceiptNotUsedAlready(receipt);
         assertValidReceptToUnpark(receipt);
         long endTimeMillis = System.currentTimeMillis();
         long startTimeMillis = occupiedVehicle.startTimeMillis();
@@ -46,8 +46,8 @@ public final class Slot {
         return (endTimeMillis - startTimeMillis);
     }
 
-    public void assertReceptNotUsedAlready(Receipt receipt) {
-        if (isAlreadyUedReceipt(receipt)) {
+    public void assertReceiptNotUsedAlready(Receipt receipt) {
+        if (isAlreadyUsedReceipt(receipt)) {
             throw new InvalidReceiptException("Receipt is already used");
         }
     }
@@ -98,7 +98,7 @@ public final class Slot {
     }
 
     public boolean isValidReceptToUnpark(Receipt receipt) {
-        if (isOccupied() || isAlreadyUedReceipt(receipt)) {
+        if (isOccupied() || isAlreadyUsedReceipt(receipt)) {
             return false;
         }
 
@@ -107,7 +107,7 @@ public final class Slot {
         return Objects.equals(slotHash, receiptHash);
     }
 
-    public boolean isAlreadyUedReceipt(Receipt receipt) {
+    public boolean isAlreadyUsedReceipt(Receipt receipt) {
         String receiptHash = generateReceiptHash(receipt);
         return usedReceipts.contains(receiptHash);
     }

@@ -52,8 +52,28 @@ public final class Slot {
         }
     }
 
-    public int getPrice() {
-        return supportedVehicleType.getPrice();
+    public int getPricePerHour() {
+        return supportedVehicleType.getPricePerHour();
+    }
+
+    public Receipt prepareReceipt() {
+        OccupiedVehicle occupiedVehicle = getOccupiedVehicle();
+        Vehicle vehicle = occupiedVehicle.vehicle();
+
+        return new Receipt(
+                slotNumber,
+                floor,
+                occupiedVehicle.startTimeMillis(),
+                vehicle.getVehicleNumber().orElse("Not Available"),
+                vehicle.getType(),
+                getPricePerHour()
+        );
+    }
+
+    public boolean isValidRecept(Receipt receipt) {
+        String receiptHash = hashCode(receipt.floor(), receipt.slotNumber(), receipt.vehicleType());
+        String slotHash = hashCode(floor, slotNumber, supportedVehicleType);
+        return Objects.equals(slotHash, receiptHash);
     }
 
     @Override
@@ -65,6 +85,10 @@ public final class Slot {
         return floor == slot.floor
                 && slotNumber == slot.slotNumber
                 && supportedVehicleType == slot.supportedVehicleType;
+    }
+
+    private static String hashCode(int floor, int slotNumber, VehicleType vehicleType) {
+        return floor + "#" + slotNumber + "#" + vehicleType;
     }
 
     @Override

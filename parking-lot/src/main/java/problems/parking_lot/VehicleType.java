@@ -12,5 +12,5 @@ public enum VehicleType {
     BYCYCLE(20),
     ;
 
-    private final int price;
+    private final int pricePerHour;
 }

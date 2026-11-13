@@ -1,9 +1,10 @@
 package problems.parking_lot;
 
 import lombok.Getter;
+import problems.parking_lot.exception.SlotNotAvailable;
+import problems.parking_lot.exception.VehicleNotFoundException;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @Getter
 public final class Slot {
@@ -20,8 +21,39 @@ public final class Slot {
         this.supportedVehicleType = supportedVehicleType;
     }
 
-    public Optional<OccupiedVehicle> getOccupiedVehicle() {
-        return Optional.ofNullable(occupiedVehicle);
+    public OccupiedVehicle getOccupiedVehicle() {
+        if (occupiedVehicle == null) {
+            throw new VehicleNotFoundException("Slot is not occupied by any vehicle");
+        }
+        return occupiedVehicle;
+    }
+
+    public OccupiedVehicle park(Vehicle vehicle) {
+        assertSlotIsAvailable();
+        long startTimeMillis = System.currentTimeMillis();
+        occupiedVehicle = new OccupiedVehicle(startTimeMillis, vehicle);
+        return occupiedVehicle;
+    }
+
+    public long unpark() {
+        occupiedVehicle = null;
+        long endTimeMillis = System.currentTimeMillis();
+        long startTimeMillis = (occupiedVehicle == null) ? endTimeMillis : occupiedVehicle.startTimeMillis();
+        return (endTimeMillis - startTimeMillis);
+    }
+
+    public boolean isAvailable() {
+        return (occupiedVehicle != null);
+    }
+
+    private void assertSlotIsAvailable() {
+        if (!isAvailable()) {
+            throw new SlotNotAvailable("Slot is not available");
+        }
+    }
+
+    public int getPrice() {
+        return supportedVehicleType.getPrice();
     }
 
     @Override

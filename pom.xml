@@ -11,6 +11,7 @@
     <modules>
         <module>snake-and-ladder</module>
         <module>parking-lot</module>
+        <module>splitwise</module>
     </modules>
     <dependencies>
         <dependency>

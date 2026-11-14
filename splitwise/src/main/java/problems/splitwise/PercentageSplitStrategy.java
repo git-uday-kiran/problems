@@ -25,8 +25,8 @@ public final class PercentageSplitStrategy implements SplitStrategy {
 
     private static long share(long amountPaise, double percentage) {
         return BigDecimal.valueOf(amountPaise)
-                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(percentage))
+                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP)
                 .longValueExact();
     }
 

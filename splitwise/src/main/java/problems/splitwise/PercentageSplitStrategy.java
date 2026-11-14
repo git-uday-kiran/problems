@@ -6,13 +6,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static java.util.Objects.requireNonNull;
-
 public final class PercentageSplitStrategy implements SplitStrategy {
     @Override
     public List<Share> split(List<Participant> participants, long amountPaise) {
-        requireNonNull(participants);
-        assertParticipantsPercentageNotNull(participants);
+        assertAtLeastOneParticipant(participants, amountPaise);
+        participants.forEach(Participant::assertValueNotNull);
         assertParticipantsPercentagesSumUpTo100(participants);
 
         List<Share> shares = new ArrayList<>();
@@ -30,12 +28,6 @@ public final class PercentageSplitStrategy implements SplitStrategy {
                 .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(percentage))
                 .longValueExact();
-    }
-
-    private static void assertParticipantsPercentageNotNull(Collection<Participant> participants) {
-        for (Participant participant : participants) {
-            requireNonNull(participant.value(), "Participant percentage can not be null");
-        }
     }
 
     private static void assertParticipantsPercentagesSumUpTo100(Collection<Participant> participants) {

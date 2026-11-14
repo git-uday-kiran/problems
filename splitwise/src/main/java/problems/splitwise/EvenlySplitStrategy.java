@@ -6,10 +6,7 @@ import java.util.List;
 public final class EvenlySplitStrategy implements SplitStrategy {
     @Override
     public List<Share> split(List<Participant> participants, long amountPaise) {
-        if (amountPaise != 0 && participants.isEmpty()) {
-            throw new IllegalStateException("No participants on amount to be split");
-        }
-
+        assertAtLeastOneParticipant(participants, amountPaise);
         long eventShare = (amountPaise / participants.size());
         long leftOverShare = (amountPaise - (eventShare * participants.size()));
 

@@ -16,4 +16,12 @@ public record Participant(String userId, Double value) {
     public Share toShare(long amountPaise) {
         return new Share(userId, amountPaise);
     }
+
+    public static Participant of(String userId) {
+        return new Participant(userId, null);
+    }
+
+    public static Participant of(String userId, Double value) {
+        return new Participant(userId, value);
+    }
 }

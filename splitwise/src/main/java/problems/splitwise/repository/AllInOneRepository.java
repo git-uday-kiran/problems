@@ -1,6 +1,6 @@
 package problems.splitwise.repository;
 
-import problems.splitwise.IdGenerator;
+import problems.splitwise.util.IdGenerator;
 import problems.splitwise.models.*;
 
 import java.util.*;

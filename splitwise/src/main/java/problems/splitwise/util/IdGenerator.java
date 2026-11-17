@@ -1,4 +1,4 @@
-package problems.splitwise;
+package problems.splitwise.util;
 
 import java.util.Arrays;
 import java.util.UUID;

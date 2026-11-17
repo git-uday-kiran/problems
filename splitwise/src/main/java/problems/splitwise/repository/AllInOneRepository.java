@@ -2,10 +2,8 @@ package problems.splitwise.repository;
 
 import problems.splitwise.models.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public final class AllInOneRepository {
 
@@ -31,6 +29,21 @@ public final class AllInOneRepository {
 
     public Optional<Group> findGroup(String groupId) {
         return Optional.ofNullable(groups.get(groupId));
+    }
+
+    public Set<String> getGroupIds(String userId) {
+        return getGroups(userId).stream()
+                .map(Group::getId)
+                .collect(Collectors.toSet());
+    }
+
+    public List<Group> getGroups(String userId) {
+        return groupUsers.values().stream()
+                .filter(groupUser -> groupUser.getUserId().equals(userId))
+                .map(GroupUser::getGroupId)
+                .map(this::findGroup)
+                .flatMap(Optional::stream)
+                .toList();
     }
 
     public Optional<GroupUser> findGroupUser(String groupId, String userId) {

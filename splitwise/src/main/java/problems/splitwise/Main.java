@@ -20,9 +20,9 @@ public final class Main {
         String userId2 = repo.createUser();
         String userId3 = repo.createUser();
 
-        String groupUserId1 = repo.createGroupUser(userId1, groupId);
-        String groupUserId2 = repo.createGroupUser(userId2, groupId);
-        String groupUserId3 = repo.createGroupUser(userId3, groupId);
+        String groupUserId1 = repo.createGroupUser(groupId, userId1);
+        String groupUserId2 = repo.createGroupUser(groupId, userId2);
+        String groupUserId3 = repo.createGroupUser(groupId, userId3);
 
         List<Participant> participants = List.of(
                 Participant.of(userId2),

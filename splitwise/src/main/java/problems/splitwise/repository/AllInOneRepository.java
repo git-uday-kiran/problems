@@ -36,7 +36,7 @@ public final class AllInOneRepository {
         return group.getId();
     }
 
-    public String createGroupUser(String userId, String groupId) {
+    public String createGroupUser(String groupId, String userId) {
         // Suppressing validations on user id and group id
         GroupUser groupUser = new GroupUser(groupId, userId);
         groupUsers.put(groupUser.getId(), groupUser);

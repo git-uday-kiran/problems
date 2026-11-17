@@ -1,4 +1,4 @@
-package problems.splitwise;
+package problems.splitwise.models;
 
 public final class User {
     private final String id;

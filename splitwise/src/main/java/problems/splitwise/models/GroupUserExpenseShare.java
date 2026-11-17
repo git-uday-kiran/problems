@@ -1,6 +1,7 @@
-package problems.splitwise;
+package problems.splitwise.models;
 
 import lombok.Getter;
+import problems.splitwise.IdGenerator;
 
 import static java.util.Objects.requireNonNull;
 

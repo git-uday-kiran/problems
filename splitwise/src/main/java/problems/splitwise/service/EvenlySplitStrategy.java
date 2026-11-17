@@ -1,4 +1,7 @@
-package problems.splitwise;
+package problems.splitwise.service;
+
+import problems.splitwise.models.Participant;
+import problems.splitwise.models.Share;
 
 import java.util.ArrayList;
 import java.util.List;

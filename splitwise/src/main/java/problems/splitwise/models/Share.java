@@ -1,4 +1,4 @@
-package problems.splitwise;
+package problems.splitwise.models;
 
 import static java.util.Objects.requireNonNull;
 

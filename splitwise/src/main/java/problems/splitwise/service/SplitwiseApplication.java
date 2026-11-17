@@ -1,11 +1,12 @@
 package problems.splitwise.service;
 
 import problems.splitwise.exception.GroupException;
+import problems.splitwise.exception.GroupUserException;
 import problems.splitwise.exception.ParticipantException;
 import problems.splitwise.exception.UserException;
-import problems.splitwise.models.Group;
+import problems.splitwise.models.GroupUser;
 import problems.splitwise.models.Participant;
-import problems.splitwise.models.User;
+import problems.splitwise.models.Share;
 import problems.splitwise.repository.AllInOneRepository;
 import problems.splitwise.service.splitstrategy.SplitStrategy;
 
@@ -21,11 +22,22 @@ public final class SplitwiseApplication {
         this.repo = repo;
     }
 
-    public void addExpense(String userId, String groupId, List<Participant> participants, SplitStrategy splitStrategy) {
-        User user = repo.findUser(userId).orElseThrow(UserException.userNotFound(userId));
-        Group group = repo.findGroup(groupId).orElseThrow(GroupException.groupNotFound(groupId));
-        assertAllParticipantsShouldBeInTheGroup(participants, groupId);
+    public void addExpense(String userId, String groupId, long amountPaidPaise, List<Participant> participants, SplitStrategy splitStrategy) {
+        repo.findUser(userId).orElseThrow(UserException.userNotFound(userId));
+        repo.findGroup(groupId).orElseThrow(GroupException.groupNotFound(groupId));
 
+        GroupUser groupUser = repo.findGroupUser(userId, groupId).orElseThrow(GroupUserException.groupUserNotFound(groupId, userId));
+        String groupUserId = groupUser.getId();
+
+        assertAllParticipantsShouldBeInTheGroup(participants, groupId);
+        String expenseId = repo.createGroupUserExpense(groupUserId, amountPaidPaise);
+
+        List<Share> splits = splitStrategy.split(participants, amountPaidPaise);
+        for (Share split : splits) {
+            String participantUserId = split.userId();
+            GroupUser participantGroupUser = repo.findGroupUser(groupId, participantUserId).orElseThrow(GroupUserException.groupUserNotFound(groupId, participantUserId));
+            repo.createGroupUserExpenseShare(expenseId, participantGroupUser.getId(), split.amountPaise());
+        }
     }
 
     private void assertAllParticipantsShouldBeInTheGroup(Collection<Participant> participants, String groupId) {

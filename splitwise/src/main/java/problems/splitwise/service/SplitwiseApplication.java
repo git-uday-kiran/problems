@@ -26,7 +26,7 @@ public final class SplitwiseApplication {
         repo.findUser(userId).orElseThrow(UserException.userNotFound(userId));
         repo.findGroup(groupId).orElseThrow(GroupException.groupNotFound(groupId));
 
-        GroupUser groupUser = repo.findGroupUser(userId, groupId).orElseThrow(GroupUserException.groupUserNotFound(groupId, userId));
+        GroupUser groupUser = repo.findGroupUser(groupId, userId).orElseThrow(GroupUserException.groupUserNotFound(groupId, userId));
         String groupUserId = groupUser.getId();
 
         assertAllParticipantsShouldBeInTheGroup(participants, groupId);

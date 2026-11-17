@@ -1,7 +1,7 @@
 package problems.splitwise.repository;
 
-import problems.splitwise.util.IdGenerator;
 import problems.splitwise.models.*;
+import problems.splitwise.util.IdGenerator;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -79,7 +79,10 @@ public final class AllInOneRepository {
     }
 
     public Optional<GroupUser> findGroupUser(String groupId, String userId) {
-        return Optional.ofNullable(groupUsers.get(groupId));
+        return groupUsers.values().stream()
+                .filter(groupUser -> groupUser.getGroupId().equals(groupId))
+                .filter(groupUser -> groupUser.getUserId().equals(userId))
+                .findFirst();
     }
 
     public Optional<GroupUser> findGroupUser(String groupUserId) {

@@ -2,9 +2,9 @@ package problems.splitwise.models;
 
 import static java.util.Objects.requireNonNull;
 
-public record Participant(String groupUserId, Double value) {
+public record Participant(String userId, Double value) {
     public Participant {
-        requireNonNull(groupUserId);
+        requireNonNull(userId);
     }
 
     public void assertValueNotNull() {
@@ -14,6 +14,6 @@ public record Participant(String groupUserId, Double value) {
     }
 
     public Share toShare(long amountPaise) {
-        return new Share(groupUserId, amountPaise);
+        return new Share(userId, amountPaise);
     }
 }

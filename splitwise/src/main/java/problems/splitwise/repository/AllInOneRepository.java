@@ -1,5 +1,6 @@
 package problems.splitwise.repository;
 
+import problems.splitwise.IdGenerator;
 import problems.splitwise.models.*;
 
 import java.util.*;
@@ -21,6 +22,37 @@ public final class AllInOneRepository {
         groupUsers = new HashMap<>();
         groupUserExpenses = new HashMap<>();
         groupUserExpenseShares = new HashMap<>();
+    }
+
+    public String createUser() {
+        User user = new User(IdGenerator.generate());
+        users.put(user.getId(), user);
+        return user.getId();
+    }
+
+    public String createGroup() {
+        Group group = new Group(IdGenerator.generate());
+        groups.put(group.getId(), group);
+        return group.getId();
+    }
+
+    public String createGroupUser(String userId, String groupId) {
+        // Suppressing validations on user id and group id
+        GroupUser groupUser = new GroupUser(groupId, userId);
+        groupUsers.put(groupUser.getId(), groupUser);
+        return groupUser.getId();
+    }
+
+    public String createGroupUserExpense(String groupUserId, long amountPaidPaise) {
+        GroupUserExpense groupUserExpense = new GroupUserExpense(groupUserId, amountPaidPaise);
+        groupUserExpenses.put(groupUserExpense.getId(), groupUserExpense);
+        return groupUserExpense.getId();
+    }
+
+    public String createGroupUserExpenseShare(String groupUserExpenseId, String groupUserId, long amountOwedPaise) {
+        GroupUserExpenseShare groupUserExpenseShare = new GroupUserExpenseShare(groupUserExpenseId, groupUserId, amountOwedPaise);
+        groupUserExpenseShares.put(groupUserExpenseShare.getId(), groupUserExpenseShare);
+        return groupUserExpenseShare.getId();
     }
 
     public Optional<User> findUser(String userId) {

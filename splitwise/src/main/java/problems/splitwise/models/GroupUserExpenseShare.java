@@ -10,11 +10,13 @@ public final class GroupUserExpenseShare {
 
     private final String id;
     private final String groupUserExpenseId;
-    private final long amountPaise;
+    private final String groupUserId;
+    private final long amountOwedPaise;
 
-    public GroupUserExpenseShare(String groupUserExpenseId, long amountPaise) {
+    public GroupUserExpenseShare(String groupUserExpenseId, String groupUserId, long amountOwedPaise) {
         this.id = IdGenerator.generate(groupUserExpenseId);
         this.groupUserExpenseId = requireNonNull(groupUserExpenseId);
-        this.amountPaise = amountPaise;
+        this.groupUserId = groupUserId;
+        this.amountOwedPaise = amountOwedPaise;
     }
 }

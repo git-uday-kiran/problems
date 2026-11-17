@@ -1,4 +1,4 @@
-package problems.splitwise.service;
+package problems.splitwise.service.splitstrategy;
 
 import problems.splitwise.models.Participant;
 import problems.splitwise.models.Share;

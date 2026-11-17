@@ -1,7 +1,7 @@
-package problems.splitwise;
+package problems.splitwise.service;
 
 import problems.splitwise.models.Participant;
-import problems.splitwise.service.SplitStrategy;
+import problems.splitwise.service.splitstrategy.SplitStrategy;
 
 import java.util.List;
 

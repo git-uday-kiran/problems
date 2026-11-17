@@ -9,11 +9,11 @@ public final class GroupUserExpense {
 
     private final String id;
     private final String groupUserId;
-    private final long amountPaise;
+    private final long amountPaidPaise;
 
-    public GroupUserExpense(String groupUserId, long amountPaise) {
+    public GroupUserExpense(String groupUserId, long amountPaidPaise) {
         this.id = IdGenerator.generate(groupUserId);
         this.groupUserId = Objects.requireNonNull(groupUserId);
-        this.amountPaise = amountPaise;
+        this.amountPaidPaise = amountPaidPaise;
     }
 }

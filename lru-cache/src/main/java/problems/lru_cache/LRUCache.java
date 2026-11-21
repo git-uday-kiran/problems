@@ -43,13 +43,13 @@ public final class LRUCache<T> implements Cache<T> {
             if (v == null) {
                 return null;
             }
-            if (v.isExpired(clock)) {
-                remove(key);
-                return null;
-            }
             markLastUsed(key);
             return v;
         });
+        if (value != null && value.isExpired(clock)) {
+            remove(key);
+            return Optional.empty();
+        }
         return Optional.ofNullable(value).map(KeyData::value);
     }
 
@@ -90,7 +90,7 @@ public final class LRUCache<T> implements Cache<T> {
     }
 
     private void checkStorageSizeAndShrink() {
-        if (storage.size() == capacity) {
+        if (storage.size() >= capacity) {
             String lruKey = withLRULock(lruKeys::removeFirst);
             storage.remove(lruKey);
         }
@@ -121,5 +121,10 @@ public final class LRUCache<T> implements Cache<T> {
     @Override
     public void close() {
         sweeper.close();
+    }
+
+    @Override
+    public String toString() {
+        return "LRUCache{" + storage + '}';
     }
 }

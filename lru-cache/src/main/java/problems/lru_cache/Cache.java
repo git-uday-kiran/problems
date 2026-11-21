@@ -9,4 +9,6 @@ public interface Cache<T> {
     void set(String key, T value);
 
     void set(String key, T value, Duration ttl);
+
+    void remove(String key);
 }

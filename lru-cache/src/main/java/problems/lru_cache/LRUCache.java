@@ -9,6 +9,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public final class LRUCache<T> implements Cache<T> {
 
@@ -16,8 +18,8 @@ public final class LRUCache<T> implements Cache<T> {
     private final Clock clock;
     private final Map<String, KeyData<T>> storage;
 
-    private final LinkedHashSet<String> leastRecentUsedKeys;
-    private final ReentrantLock lestRecentUsedKeysLock;
+    private final ReentrantLock lruLock;
+    private final LinkedHashSet<String> lruKeys;
 
     public LRUCache(int capacity, Clock clock) {
         if (capacity <= 0) {
@@ -28,8 +30,8 @@ public final class LRUCache<T> implements Cache<T> {
         this.capacity = capacity;
         this.clock = clock;
         this.storage = new ConcurrentHashMap<>();
-        this.leastRecentUsedKeys = new LinkedHashSet<>();
-        lestRecentUsedKeysLock = new ReentrantLock();
+        this.lruKeys = new LinkedHashSet<>();
+        this.lruLock = new ReentrantLock();
     }
 
     @Override
@@ -58,6 +60,15 @@ public final class LRUCache<T> implements Cache<T> {
         set(key, value, expireMillis);
     }
 
+    @Override
+    public void remove(String key) {
+        Objects.requireNonNull(key, "key cannot be null");
+        storage.compute(key, (k, v) -> {
+            withLRULock(key, lruKeys::remove);
+            return null;
+        });
+    }
+
     private void set(String key, T value, long expireMillis) {
         Objects.requireNonNull(key, "key must not be null");
         Objects.requireNonNull(value, "value must not be null");
@@ -74,23 +85,35 @@ public final class LRUCache<T> implements Cache<T> {
 
     private void checkStorageSizeAndShrink() {
         if (storage.size() == capacity) {
-            lestRecentUsedKeysLock.lock();
+            lruLock.lock();
             try {
-                String leastRecentUsedKey = leastRecentUsedKeys.removeFirst();
-                storage.remove(leastRecentUsedKey);
+                String lruKey = withLRULock(lruKeys::removeFirst);
+                storage.remove(lruKey);
             } finally {
-                lestRecentUsedKeysLock.unlock();
+                lruLock.unlock();
             }
         }
     }
 
     private void markLastUsed(String key) {
-        lestRecentUsedKeysLock.lock();
+        withLRULock(key, lruKeys::addLast);
+    }
+
+    private void withLRULock(String key, Consumer<String> action) {
+        lruLock.lock();
         try {
-            leastRecentUsedKeys.addLast(key);
+            action.accept(key);
         } finally {
-            lestRecentUsedKeysLock.unlock();
+            lruLock.unlock();
         }
     }
 
+    private <R> R withLRULock(Supplier<R> supplier) {
+        lruLock.lock();
+        try {
+            return supplier.get();
+        } finally {
+            lruLock.unlock();
+        }
+    }
 }

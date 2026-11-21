@@ -41,6 +41,10 @@ public final class LRUCache<T> implements Cache<T> {
             if (v == null) {
                 return null;
             }
+            if (v.isExpired(clock)) {
+                remove(key);
+                return null;
+            }
             markLastUsed(key);
             return v;
         });

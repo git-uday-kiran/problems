@@ -3,7 +3,7 @@ package problems.lru_cache;
 import java.time.Duration;
 import java.util.Optional;
 
-public interface Cache<T> {
+public interface Cache<T> extends AutoCloseable {
     Optional<T> get(String key);
 
     void set(String key, T value);

@@ -1,7 +1,5 @@
 package problems.lru_cache;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Clock;
 import java.time.Duration;
@@ -13,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class LRUCache<T> implements Cache<T>, Closeable {
+public final class LRUCache<T> implements Cache<T> {
 
     private final int capacity;
     private final Clock clock;
@@ -121,7 +119,7 @@ public final class LRUCache<T> implements Cache<T>, Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         sweeper.close();
     }
 }

@@ -1,7 +1,5 @@
 package problems.lru_cache;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.time.Clock;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -9,7 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public final class ScheduledDataSweeper<T> implements ExpiredDataSweeper<ConcurrentHashMap<String, KeyData<T>>>, Closeable {
+public final class ScheduledDataSweeper<T> implements ExpiredDataSweeper<ConcurrentHashMap<String, KeyData<T>>>, AutoCloseable {
 
     private final Clock clock;
     private final ScheduledExecutorService scheduleService;
@@ -40,7 +38,7 @@ public final class ScheduledDataSweeper<T> implements ExpiredDataSweeper<Concurr
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         scheduleService.shutdownNow();
     }
 }

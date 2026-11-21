@@ -85,13 +85,8 @@ public final class LRUCache<T> implements Cache<T> {
 
     private void checkStorageSizeAndShrink() {
         if (storage.size() == capacity) {
-            lruLock.lock();
-            try {
-                String lruKey = withLRULock(lruKeys::removeFirst);
-                storage.remove(lruKey);
-            } finally {
-                lruLock.unlock();
-            }
+            String lruKey = withLRULock(lruKeys::removeFirst);
+            storage.remove(lruKey);
         }
     }
 

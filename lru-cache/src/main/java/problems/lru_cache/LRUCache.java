@@ -8,19 +8,28 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class LRUCache<T> implements Cache<T> {
 
     private final int capacity;
     private final Clock clock;
     private final Map<String, KeyData<T>> storage;
+
     private final LinkedHashSet<String> leastRecentUsedKeys;
+    private final ReentrantLock lestRecentUsedKeysLock;
 
     public LRUCache(int capacity, Clock clock) {
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("Capacity must be positive");
+        }
+        Objects.requireNonNull(clock, "Clock must not be null");
+
         this.capacity = capacity;
         this.clock = clock;
         this.storage = new ConcurrentHashMap<>();
         this.leastRecentUsedKeys = new LinkedHashSet<>();
+        lestRecentUsedKeysLock = new ReentrantLock();
     }
 
     @Override
@@ -30,7 +39,7 @@ public final class LRUCache<T> implements Cache<T> {
             if (v == null) {
                 return null;
             }
-            leastRecentUsedKeys.addLast(key);
+            markLastUsed(key);
             return v;
         });
         return Optional.ofNullable(value).map(KeyData::value);
@@ -55,13 +64,33 @@ public final class LRUCache<T> implements Cache<T> {
 
         storage.compute(key, (k, v) -> {
             if (v == null) {
-                if (storage.size() == capacity) {
-                    storage.remove(leastRecentUsedKeys.removeFirst());
-                }
+                checkStorageSizeAndShrink();
             }
             KeyData<T> keyData = new KeyData<>(value, expireMillis);
-            leastRecentUsedKeys.addLast(key);
+            markLastUsed(key);
             return keyData;
         });
     }
+
+    private void checkStorageSizeAndShrink() {
+        if (storage.size() == capacity) {
+            lestRecentUsedKeysLock.lock();
+            try {
+                String leastRecentUsedKey = leastRecentUsedKeys.removeFirst();
+                storage.remove(leastRecentUsedKey);
+            } finally {
+                lestRecentUsedKeysLock.unlock();
+            }
+        }
+    }
+
+    private void markLastUsed(String key) {
+        lestRecentUsedKeysLock.lock();
+        try {
+            leastRecentUsedKeys.addLast(key);
+        } finally {
+            lestRecentUsedKeysLock.unlock();
+        }
+    }
+
 }

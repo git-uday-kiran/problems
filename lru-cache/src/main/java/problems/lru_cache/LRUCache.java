@@ -1,10 +1,11 @@
 package problems.lru_cache;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,14 +13,16 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class LRUCache<T> implements Cache<T> {
+public final class LRUCache<T> implements Cache<T>, Closeable {
 
     private final int capacity;
     private final Clock clock;
-    private final Map<String, KeyData<T>> storage;
+    private final ConcurrentHashMap<String, KeyData<T>> storage;
 
     private final ReentrantLock lruLock;
     private final LinkedHashSet<String> lruKeys;
+
+    private final ScheduledDataSweeper<T> sweeper;
 
     public LRUCache(int capacity, Clock clock) {
         if (capacity <= 0) {
@@ -32,6 +35,7 @@ public final class LRUCache<T> implements Cache<T> {
         this.storage = new ConcurrentHashMap<>();
         this.lruKeys = new LinkedHashSet<>();
         this.lruLock = new ReentrantLock();
+        sweeper = new ScheduledDataSweeper<>(clock, storage, lruKeys::remove);
     }
 
     @Override
@@ -114,5 +118,10 @@ public final class LRUCache<T> implements Cache<T> {
         } finally {
             lruLock.unlock();
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        sweeper.close();
     }
 }

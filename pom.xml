@@ -12,6 +12,7 @@
         <module>snake-and-ladder</module>
         <module>parking-lot</module>
         <module>splitwise</module>
+        <module>lru-cache</module>
     </modules>
     <dependencies>
         <dependency>
